@@ -1,3 +1,5 @@
 numpy
 keras
 tensorflow
+scikit-learn
+wandb

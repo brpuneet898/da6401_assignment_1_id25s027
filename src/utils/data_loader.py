@@ -53,14 +53,14 @@ def load_dataset(dataset: str, val_split: float = 0.1, seed: int = 42, flatten: 
 
     return (X_train, y_train), (X_val, y_val), (X_test, y_test)
 
-    def batch_iterator(X, y, batch_size: int, shuffle: bool = True, seed: int = 42):
-        n = X.shape[0]
-        indic = np.arange(n)
+def batch_iterator(X, y, batch_size: int, shuffle: bool = True, seed: int = 42):
+    n = X.shape[0]
+    indic = np.arange(n)
 
-        if shuffle:
-            rng = np.random.default_rng(seed)
-            rng.shuffle(indic)
+    if shuffle:
+        rng = np.random.default_rng(seed)
+        rng.shuffle(indic)
 
-        for start in range(0, n, batch_size):
-            batch_idx = indic[start:start + batch_size]
-            yield X[batch_idx], y[batch_idx]
+    for start in range(0, n, batch_size):
+        batch_idx = indic[start:start + batch_size]
+        yield X[batch_idx], y[batch_idx]
