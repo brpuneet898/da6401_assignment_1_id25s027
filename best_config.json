@@ -1,1 +1,1 @@
-{"learning_rate": 0.0001, "activation": "tanh", "epochs": 20, "hidden_layers": [128, 128, 128, 128, 128], "loss": "cross_entropy", "weight_init": "xavier", "weight_decay": 0.0001, "batch_size": 16, "optimizer": "nag", "wandb_project": "DA6401_Assignment_1_main"}
+{"learning_rate": 0.0001, "activation": "tanh", "epochs": 20, "hidden_layers": [128, 128, 128, 128, 128], "loss": "cross_entropy", "weight_init": "xavier", "weight_decay": 0.0001, "batch_size": 16, "optimizer": "nag", "wandb_project": "da6401-assignment1-puneet-id25s027"}
