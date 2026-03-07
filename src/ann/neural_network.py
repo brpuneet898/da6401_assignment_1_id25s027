@@ -6,27 +6,21 @@ Handles forward and backward propagation loops
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 from typing import List, Callable, Dict
-
 import numpy as np
-
 from ann.neural_layer import NeuralLayer
-
 from ann.optimizers import sgd, momentum, nesterov, rmsprop, adam, nadam
 from ann.objective_functions import cross_entropy, mse
-
 from ann.utils import get_dead_neurons
-
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, accuracy_score, f1_score
-
 import matplotlib.pyplot as plt
-
 from wandb import Image
 
 
 class NeuralNetwork:
+    ## here we are defining a neural network
     def __init__(self, cli_args, **kwargs):
+        ## initializing the class with hiddne layers
         self.hidden_activation = getattr(cli_args, "activation", "tanh") or "tanh"
         
         self.hidden_layers = None
@@ -43,7 +37,10 @@ class NeuralNetwork:
 
         if not self.hidden_layers:
             self.hidden_layers =  [128,128,128,128,128]
-
+        ## here we are defining all kinds of arguments that will be allowed
+        ## like learning rate , optimizer which type, loss function which type is allowed,
+        ## weight initialization methods like random or xavier
+        ## other things like input, output and activation, are defined
         self.learning_rate     = getattr(cli_args, "learning_rate", 0.0001) or 0.0001
         self.optimizer         = getattr(cli_args, "optimizer", "nag") or "nag"
         self.loss_function     = getattr(cli_args, "loss", "cross_entropy") or "cross_entropy"
@@ -55,7 +52,8 @@ class NeuralNetwork:
         self.output_size       = kwargs.get("output_size") or 10
         self.output_activation = kwargs.get("output_activation") or "softmax"
         
-
+        ## this will check whether the arguments that have been passed by the user
+        ## are correct or not. 
         assert self.hidden_activation in ["relu", "sigmoid", "softmax", "tanh"],                 f"Activation function {self.hidden_activation} must be any of ('relu', 'sigmoid', 'tanh', 'softmax')"
         assert self.weight_init       in ["zero", "zeros","random", "xavier"],                   "Weight initialization method must be one of ('zero', 'zeros', 'random', 'xavier')"
         assert self.optimizer         in ["sgd", "momentum", "nag", "rmsprop", "adam", "nadam"], "Optimizer must be one of ['sgd', 'momentum', 'nag', 'rmsprop', 'adam', 'nadam']"
@@ -109,6 +107,8 @@ class NeuralNetwork:
                 self.v_biases.append(np.zeros_like(self.layers[-1].biases))
 
     def forward(self, x):
+        ## this is the simple forward pass implementation 
+        ## where the logits are calculated on the basis of the input which goes forward.
         a = x
 
         for i in range(len(self.layers)):
@@ -116,7 +116,10 @@ class NeuralNetwork:
 
         return logits
     
-    def backward(self, y_true, y_pred):      
+    def backward(self, y_true, y_pred):  
+        ## here the back prop is done based on the output activation and the loss function
+        # if the output CE and softmax activation then its classification
+        # otherwise simple MSE means regression problem is there.    
         if self.loss_function == "cross_entropy" and self.output_activation == "softmax":
             delta = y_pred - y_true
         elif self.loss_function == "mse":
@@ -151,6 +154,9 @@ class NeuralNetwork:
         return self.grad_W, self.grad_b
 
     def update_weights(self):
+        ## here we are updating the weights based on the optimizer that 
+        # is being used, here we have defined everything that might come in use later. 
+        # like learning rate, beta, epsilon, gamma, etc. 
         lr = self.learning_rate
         b1 = self.beta1
         b2 = self.beta2
@@ -200,7 +206,7 @@ class NeuralNetwork:
               y_val: np.ndarray=None,
               wandb=None
             )->None:
-        
+        ## this is the main training function
         n_samples = x_train.shape[0]
 
         if batch_size is None:
@@ -301,13 +307,17 @@ class NeuralNetwork:
 
         
     def predict(self, x_test: np.ndarray)->np.ndarray:
+        ## here we are predicting based on the input 
+        # and calculate the logits.
+        ## this function return the logits only. 
         logits = self.forward(x_test)
 
         preds = self.layers[-1].activation_function(logits)
 
         return preds.argmax(axis=1)
 
-    def evaluate(self, X, y)->Dict[str,float]:     
+    def evaluate(self, X, y)->Dict[str,float]:    
+        ## this is the function for the evaluation 
         logits = self.forward(X)
 
         y_pred = self.layers[-1].activation_function[0](logits)
@@ -345,12 +355,14 @@ class NeuralNetwork:
     
 
     def accuracy_score(self, y_true: np.ndarray, y_pred: np.ndarray)-> float:
+        ## whatever score is that we get, we convert that into accuracy percentage here.
         y_true = np.argmax(y_true, axis=1)
         y_pred = np.argmax(y_pred, axis=1)
 
         return np.mean(y_true==y_pred) * 100
     
     def wandb_imshow(self, x: np.ndarray, title=""):
+        # this will act as a helper function for the wandb plotting
         x[np.isnan(x)] = 0
         mn = np.min(x)
         mx = np.max(x)
@@ -365,6 +377,7 @@ class NeuralNetwork:
         return image
 
     def wandb_plot(self, x, y=None, title="", xlabel = "", ylabel=""):
+        # this will act as a helper function for the wandb plotting
         if title:
             plt.title(title)
         if xlabel and ylabel:
