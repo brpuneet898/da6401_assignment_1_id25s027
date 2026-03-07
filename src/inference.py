@@ -16,12 +16,13 @@ import os
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-
+## this will act as the base file for inference. 
 class Config:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
 def parse_arguments():
+    # the helper function to parse the command line arguments that will be used for interence.
     parser = argparse.ArgumentParser(description='Run inference on test set')
 
     parser.add_argument("--model_path", help="Path to saved model weights", type=str)
@@ -34,6 +35,8 @@ def parse_arguments():
 
 
 def load_model(model_path):
+    ## the function to load the model weights and configu which are already present 
+    ## after training of the model with the set parameters. 
     cfg = None
     config = Config()
     try:
@@ -55,11 +58,14 @@ def load_model(model_path):
 
 
 def evaluate_model(model, X_test, y_test): 
+    ## the function to evaluate the model while inferencing
+    ## it will either call the mse or cross entropy loss
     evals = model.evaluate(X_test, y_test)
     return evals
 
 
 def main():
+    ## this is the main function that will be called when the inference script is run.
     args = parse_arguments()
     dataset = getattr(args, "dataset", "mnist")
     (train_images, train_labels), (test_images, test_labels) = load_dataset(dataset)
