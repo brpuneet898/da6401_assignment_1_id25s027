@@ -19,6 +19,13 @@ from ann.neural_network import NeuralNetwork
 from sklearn.model_selection import train_test_split
 
 def parse_arguments():
+    ## in the we will define the arguments for the training loop
+    ## we have arguments for dataset - mnist or fashion_mnist
+    ## we have batch size - which will be a string of integers
+    ## we have learning rate which will be a float value
+    ## then we have the optimizer - we have define the following optimizer - sgd, momentum, nag, rmsprop, adam, nadam.
+    ## then we have the loss function - only two cross entropy and mse
+    ## activation functions are - sigmoid, tanh, relu, softmax
     parser = argparse.ArgumentParser(description='Train a neural network')
 
     parser.add_argument("--dataset", "-d", default="mnist", choices=["mnist", "fashion_mnist"], help="'mnist' or 'fashion_mnist'", type=str)
@@ -78,6 +85,7 @@ def parse_arguments():
 
 
 def main():
+    ## main training loop function is defined here. 
     args = parse_arguments()
 
     dataset = args.dataset
