@@ -3,48 +3,65 @@ Activation Functions and Their Derivatives
 Implements: ReLU, Sigmoid, Tanh, Softmax
 """
 
-from __future__ import annotations
 import numpy as np
 
-def relu(x: np.ndarray) -> np.ndarray:
-    return np.maximum(0.0, x)
+class ReLU():
+    def __init__(self, z):
+        self.z = z
+        self.grad = 0.0
 
-def drelu(x: np.ndarray) -> np.ndarray:
-    return (x > 0).astype(np.float32)
+    def forward(self):
+        self.a = np.maximum(0, self.z)
+        return self.a
+    
+    def backward(self, d):
+        self.grad += (self.z > 0).astype(float) 
+
+def relu(z: np.ndarray) -> np.ndarray :
+    a = np.maximum(0, z)
+    return a
+
+def relu_derivative(z: np.ndarray) -> np.ndarray :
+    return (z > 0).astype(float)
+
+def _neg_sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+def _pos_sigmoid(z):
+    e = np.exp(z)
+    return e / (e + 1)
 
 def sigmoid(x: np.ndarray) -> np.ndarray:
-    x = x.astype(np.float32)
-    out = np.empty_like(x, dtype=np.float32)
-    pos = x >= 0
-    neg = ~pos
-    out[pos] = 1.0 / (1.0 + np.exp(-x[pos]))
-    expx = np.exp(x[neg])
-    out[neg] = expx / (1.0 + expx)
-    return out
+    return stable_sigmoid(x)
 
-def dsigmoid_from_sigmoid(sig_x: np.ndarray) -> np.ndarray:
-    return sig_x * (1.0 - sig_x)
+def stable_sigmoid(x):
+    positive_mask = x >= 0
+    negative_mask = ~positive_mask
+    result = np.empty_like(x)
 
-def tanh(x: np.ndarray) -> np.ndarray:
-    return np.tanh(x).astype(np.float32)
+    result[positive_mask] = 1 / (1 + np.exp(-x[positive_mask]))
+    exp_x = np.exp(x[negative_mask])
+    result[negative_mask] = exp_x = exp_x / (1 + exp_x)
+    
+    return result
 
-def dtanh_from_tanh(tanh_x: np.ndarray) -> np.ndarray:
-    return (1.0 - tanh_x * tanh_x).astype(np.float32)
+def sigmoid_derivative(a: np.ndarray) -> np.ndarray:
+    return a * (1 - a)
 
-def softmax(logits: np.ndarray) -> np.ndarray:
-    logits = logits.astype(np.float32)
-    shifted = logits - np.max(logits, axis=1, keepdims=True)
-    expv = np.exp(shifted)
-    return expv / np.sum(expv, axis=1, keepdims=True)
+def tanh(z: np.ndarray) -> np.ndarray:
+    e = np.exp(2 * z)
+    a = (e - 1) / (e + 1)
+    return a
 
-def get_activation(name: str):
-    name = (name or "").lower().strip()
-    if name == "relu":
-        return relu, drelu, "pre"
-    if name == "sigmoid":
-        return sigmoid, dsigmoid_from_sigmoid, "post"
-    if name == "tanh":
-        return tanh, dtanh_from_tanh, "post"
-    if name in ["identity", "linear", ""]:
-        return (lambda x: x), (lambda _: np.ones_like(_, dtype=np.float32)), "pre"
-    raise ValueError(f"The given activation: {name} function is not supported. Please choose either relu, sigmoid, tanh, or linear.")
+def tanh_derivative(a: np.ndarray) -> np.ndarray:
+    return 1 - a ** 2
+
+def softmax(z: np.ndarray) -> np.ndarray:
+    exps = np.exp(z - np.max(z, axis=1, keepdims=True))
+    return exps / exps.sum(axis=1, keepdims=True)
+
+
+def softmax_derivative(a: np.ndarray) -> np.ndarray:
+    s = a.reshape((-1, 1)) 
+    return np.diagflat(a) - np.dot(s, s.T)
+
