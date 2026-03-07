@@ -11,7 +11,7 @@ except:
     from activations import *
 
 
-
+# we will defining these activation function in this file.
 
 activation_functions = {
     "relu": [relu, relu_derivative],
@@ -22,6 +22,7 @@ activation_functions = {
 
 
 class NeuralLayer():
+    ## first we define the neural layer with its input, output, weights, biases, activation functions.
     def __init__(self, n_in: int, n_out: int, wi: str, activation: str, layer: str):
         self.layer = layer
         self.wi = wi
@@ -39,7 +40,7 @@ class NeuralLayer():
         self.zero_grad()
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
-    
+        
         self.pre_activations = x
 
         z = x @ self.weights + self.biases 
@@ -48,13 +49,15 @@ class NeuralLayer():
         return self.activations, z
     
     def __repr__(self):
+        ## again a helper function that will be used in the printing stuff while doing wandb
         return f"NeuralLayer<layer:{self.layer}|n_in:{self.n_in}|n_out:{self.n_out}|activation:{self.activation_function[0].__name__}>"
     
     def forward(self, x: np.ndarray)-> np.ndarray:
+        ## this is the simple forward pass
         return self(x)
     
     def backward(self, delta: np.ndarray)-> np.ndarray:
-        
+        ## here we will do the backpropagation, the gradietns wrt to both weights and biases
         self.grad_W =  delta.T @  self.pre_activations 
         self.grad_b = delta.sum(axis=0, keepdims=True).T
 
@@ -62,6 +65,7 @@ class NeuralLayer():
         assert self.grad_b.shape == (self.n_out,1)
         
     def weight_init(self):
+        ## initalizing the weights here with 0, random and xavier init. 
         np.random.seed(0)
         if self.wi in ["zero", "zeros"]:
             self.weights = np.zeros((self.n_in, self.n_out))
@@ -80,12 +84,15 @@ class NeuralLayer():
         self.biases = np.zeros((1, self.n_out))
 
     def update_weights(self, weights: np.ndarray, biases: np.ndarray)->None:
+        ## the function defined to updated the weights and biases after the backprop
+        ## method .
         assert weights.shape == self.weights.shape
         assert biases.shape == self.biases.shape
         self.weights = weights
         self.biases = biases
 
     def zero_grad(self)->None:
+        ## function to zeroing out the gradients after the one step is completed.
         self.grad_W = np.zeros_like(self.weights.T)
         self.grad_b = np.zeros_like(self.biases.T)
 
